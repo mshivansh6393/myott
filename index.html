@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My OTT Platform</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #111;
+            color: #fff;
+        }
+
+        header {
+            background-color: #000;
+            padding: 20px;
+            text-align: center;
+            font-size: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .search-bar {
+            display: flex;
+            align-items: center;
+            background: #222;
+            border-radius: 5px;
+            padding: 5px;
+            width: 300px;
+        }
+
+        .search-bar input {
+            border: none;
+            background: none;
+            color: white;
+            outline: none;
+            width: 100%;
+            padding: 5px;
+        }
+
+        .search-bar button {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .card {
+            background-color: #222;
+            padding: 10px;
+            text-align: center;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .card:hover {
+            transform: scale(1.05);
+        }
+
+        .card img {
+            width: 100%;
+            border-radius: 10px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: #000;
+            padding: 20px;
+            border-radius: 10px;
+            position: relative;
+            width: 80%;
+            max-width: 800px;
+            text-align: center;
+        }
+
+        .close {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            font-size: 24px;
+            cursor: pointer;
+            color: white;
+        }
+
+        video {
+            width: 100vw;
+            height: 100vh;
+            object-fit: cover;
+        }
+
+        .modal-content {
+            background: black;
+            width: 100vw;
+            height: 100vh;
+            padding: 0;
+            border-radius: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>My OTT Platform</h1>
+        <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="Search..." onkeyup="searchContent()">
+            <button onclick="searchContent()">🔍</button>
+        </div>
+    </header>
+
+    <main>
+        <span class="close" onclick="closeModal()">&times;</span>
+
+        <section id="movies">
+            <h2>Movies</h2>
+            <div class="grid" id="movieGrid"></div>
+        </section>
+    </main>
+
+    <div id="videoModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <video id="videoPlayer" controls autoplay>
+                <source id="videoSource" src="" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        </div>
+    </div>
+
+    <script>
+        const movies = [
+            { name: "Pushpa 2", img: "https://encrypted-tbn2.gstatic.com/images?q=tbn:ANd9GcTK_Cq35EB_KZmwZ-8M--dRvv-e6WPhQlaNFnoMXKXivM6AihMq", video: "pushpa2.mp4" },
+            { name: "Hanuman", img: "https://encrypted-tbn3.gstatic.com/images?q=tbn:ANd9GcS2lgOC4q6fJzo_DnXY0Jgho2e3_5jfzlmJvRb55FPzz_pJ9jc_", video: "hanuman.mp4" },
+            { name: "Marco", img: "https://assets-in.bmscdn.com/iedb/movies/images/mobile/thumbnail/xlarge/marco-et00419498-1734330028.jpg", video: "marco.mp4" },
+            { name: "Salar", img: "https://www.cinejosh.com/newsimg/newsmainimg/aa-films-has-acquired-salar-north-india-distribution-rights_b_1811230949.jpg", video: "salar.mp4" },
+            { name: "Devara", img: "https://static1.colliderimages.com/wordpress/wp-content/uploads/sharedimages/2024/04/devara-part-1-2024.jpg?q=49&fit=crop&w=480&dpr=2", video: "devara.mp4" },
+            { name: "Sumala", img: "https://occ-0-8485-2568.1.nflxso.net/dnm/api/v6/mAcAr9TxZIVbINe88xb3Teg5_OA/AAAABYfoy6T5NcKlexHuf9beauhOg_0hoGg9s4iJZv9W7QVwPt5s3dxFHIK7AvvNamlVmVYhk5wlyNALVkIRu_RKSGD4nWq3VyavA1vj.jpg?r=284", video: "https://drive.google.com/file/d/1czkF-apXvHgTiFLRppBlCHcE13snnhMr/view?usp=drive_link" },
+            { name: "Kalki", img: "https://static.toiimg.com//thumb/msid-95073097,width-219,height-317,quality-80,imgsize-170782/kalki-2898-ad.jpg", video: "kalki.mp4" },
+            { name: "Brahmastra", img: "https://static.theprint.in/wp-content/uploads/2022/06/hgnhlgkjhlk20220611145332.jpg?compress=true&quality=80&w=800&dpr=1", video: "brahmastra.mp4" },
+            { name: "Animal", img: "https://bollywoodmovieposters.com/wp-content/uploads/2024/02/animal-movie-poster-ranbir-kapoor.jpg", video: "animal.mp4" },
+            { name: "Indian 2", img: "https://static.moviecrow.com/gallery/20240806/232608-Indian%202%20Kamal%20Haasan%20Netflix%20OTT%20Release%20Date%20Tamil%20Telugu%20Malayalam%20Kannada.jpg", video: "indian2.mp4" },
+            { name: "Fighter", img: "https://resizing.flixster.com/J4WqDElRpDqCJzIh3i9I-qyhMEA=/206x305/v2/https://resizing.flixster.com/dYrZYwZcslUE1wk6UfBvVcBZf4I=/ems.cHJkLWVtcy1hc3NldHMvbW92aWVzLzAxODk5NmU0LTJjZDAtNDRlMi05ODlkLTk4MzEyN2JlMTNiZS5qcGc=", video: "indian2.mp4" },
+            { name: "Chool Bhulaiya 2", img: "https://upload.wikimedia.org/wikipedia/en/thumb/2/23/Bhool_Bhulaiyaa_2_film_poster.jpg/220px-Bhool_Bhulaiyaa_2_film_poster.jpg", video: "indian2.mp4" },
+            { name: "Bhool Bhulaiya 3", img: "https://upload.wikimedia.org/wikipedia/en/thumb/e/e4/Bhool_Bhulaiyaa_3_poster.jpg/250px-Bhool_Bhulaiyaa_3_poster.jpg", video: "indian2.mp4" },
+            { name: "IT Chapter 1", img: "https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcS_Nk336w3I3UVd9rEHc7N7qX43m4Wl7pryt0sKo0Ge1PbA6SIi", video: "indian2.mp4" },
+            { name: "IT Chapter 2", img: "https://theyoungestfilmcritic.home.blog/wp-content/uploads/2019/09/it_chapter_two_ver4_xlg.jpg", video: "indian2.mp4" },
+            { name: "Kanguva", img: "https://assets-in.bmscdn.com/iedb/movies/images/mobile/thumbnail/xlarge/kanguva-et00357490-1711005979.jpg", video: "indian2.mp4" },
+            { name: "Stree 2", img: "https://upload.wikimedia.org/wikipedia/en/a/a1/Stree_2.jpg", video: "indian2.mp4" },
+            { name: "Munjya", img: "https://upload.wikimedia.org/wikipedia/en/thumb/3/39/Munjya_2024.jpg/220px-Munjya_2024.jpg", video: "indian2.mp4" },
+            { name: "Shaitaan", img: "https://upload.wikimedia.org/wikipedia/en/f/f0/Shaitaan_2024_film_theatrical_poster.jpeg", video: "indian2.mp4" },
+            { name: "Chhori 2", img: "https://feeds.abplive.com/onecms/images/uploaded-images/2025/03/25/69c786ce3fe27069f97c275a590c30ae17429009794111172_original.jpg", video: "indian2.mp4" },
+            { name: "Pari", img: "https://st1.bollywoodlife.com/wp-content/uploads/2021/06/MV5BMTU4YzgxMjYtMzg4Mi00MjJiLThjOGMtYThkM2E0MWQ1NTA3XkEyXkFqcGdeQXVyODE5NzE3OTE@._V1_.jpg", video: "indian2.mp4" },
+            // { name: "Tumbbad", img: "placeholder.jpg", video: "indian2.mp4" },
+            // { name: "Tumbbad 2", img: "placeholder.jpg", video: "indian2.mp4" },
+            // { name: "Bhoot Police", img: "placeholder.jpg", video: "indian2.mp4" },
+            // { name: "Bhoot Police 2", img: "placeholder.jpg", video: "indian2.mp4" },
+            // { name: "Pizza", img: "placeholder.jpg", video: "indian2.mp4" },
+            // { name: "Pizza 2", img: "placeholder.jpg", video: "indian2.mp4" },
+            // { name: "Pizza 3", img: "placeholder.jpg", video: "indian2.mp4" },
+            // { name: "Article 370", img: "placeholder.jpg", video: "indian2.mp4" },
+            // { name: "Ek villain Returns", img: "placeholder.jpg", video: "indian2.mp4" },
+            // { name: "Chandramukhi 2", img: "placeholder.jpg", video: "indian2.mp4" },
+            // { name: "Azaad", img: "placeholder.jpg", video: "indian2.mp4" },
+            
+        ];
+
+        function populateGrid(gridId, items) {
+            const grid = document.getElementById(gridId);
+            grid.innerHTML = '';
+            items.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `<img src="${item.img}" alt="${item.name}"><p>${item.name}</p>`;
+                card.onclick = () => openMovie(item);
+                grid.appendChild(card);
+            });
+        }
+
+        function openMovie(movie) {
+            const videoPlayer = document.getElementById('videoPlayer');
+            const videoModal = document.getElementById('videoModal');
+
+            document.getElementById('videoSource').src = movie.video;
+            videoPlayer.load();
+            videoModal.style.display = 'flex';
+
+            // Request Fullscreen
+            if (videoModal.requestFullscreen) {
+                videoModal.requestFullscreen();
+            } else if (videoModal.mozRequestFullScreen) {
+                videoModal.mozRequestFullScreen();
+            } else if (videoModal.webkitRequestFullscreen) {
+                videoModal.webkitRequestFullscreen();
+            } else if (videoModal.msRequestFullscreen) {
+                videoModal.msRequestFullscreen();
+            }
+
+            // Lock Screen to Landscape (only works on supported devices)
+            if (screen.orientation && screen.orientation.lock) {
+                screen.orientation.lock('landscape').catch(err => console.log(err));
+            }
+        }
+
+
+        function closeModal() {
+            document.getElementById('videoModal').style.display = 'none';
+            document.getElementById('videoPlayer').pause();
+        }
+
+        populateGrid('movieGrid', movies);
+    </script>
+</body>
+
+</html>
